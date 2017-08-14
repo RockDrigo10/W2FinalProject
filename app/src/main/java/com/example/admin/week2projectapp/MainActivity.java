@@ -51,6 +51,6 @@ public class MainActivity extends AppCompatActivity {
         builder.setContentIntent(pendingIntent);
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         notificationManager.notify(0,builder.build());
-        Toast.makeText(this, "Notification Sent!!!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, " Alert.. Notification Sent!!!", Toast.LENGTH_SHORT).show();
     }
 }
