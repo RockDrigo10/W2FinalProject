@@ -2,11 +2,14 @@ package com.example.admin.week2projectapp;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class StartStopFragment extends Fragment {
@@ -22,7 +25,48 @@ public class StartStopFragment extends Fragment {
     Button btnStar, btnStop;
     private Chronometer chronometer;
     private Thread mThreadChrono;
+    long since = 0L, mills = 0L, timeSwapBuff = 0L, updateTime = 0L, timeInMiliseconds = 0L;
+    Handler customHandler = new Handler();
+    private long mStartTime;
+    private long mStopTime;
+    boolean isRunning;
+    public static final long MILLIS_TO_MINUTS = 60000;
+    public static final long MILLIS_TO_HOURS = 3600000;
+    Context context;
 
+    Runnable updateTimerThread = new Runnable() {
+        @Override
+        public void run() {
+            while (isRunning) {
+                since = System.currentTimeMillis() - mStartTime;
+                int seconds = (int) since / (1000) % 60;
+                int min = (int) ((since / (MILLIS_TO_MINUTS)) % 60);
+                int hours = (int) ((since / (MILLIS_TO_HOURS)) % 24);
+                int mills = (int) since % 1000;
+
+                updateTimerText(String.format(
+                        "%02d:%02d:%02d:%02d", hours, min, seconds, mills));
+                //customHandler.postDelayed(this,0);
+            }
+        }
+        public void start() {
+            mStartTime = System.currentTimeMillis();
+            isRunning = true;
+        }
+
+        public void stop() {
+            isRunning = false;
+        }
+
+    };
+    TextView tvTimer;
+
+    public void updateTimerText(final String time) {
+
+        //tvTimer = (TextView) findViewById(R.id.tvTimer);
+        tvTimer.setText(time);
+
+    }
 
     private OnFragmentInteractionListener mListener;
 
@@ -53,6 +97,8 @@ public class StartStopFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View mv = inflater.inflate(R.layout.fragment_timer, container, false);
+        tvTimer = (TextView) mv.findViewById(R.id.tvTimer);
         return inflater.inflate(R.layout.fragment_start_stop, container, false);
     }
 
@@ -61,6 +107,7 @@ public class StartStopFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         btnStar = (Button) view.findViewById(R.id.btnStar);
         btnStop = (Button) view.findViewById(R.id.btnStop);
+
     }
 
     @Override
@@ -70,13 +117,17 @@ public class StartStopFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 mListener.onFragmentInteraction("start");
-                chronometer = new Chronometer(getContext());
-                if (chronometer != null) {
-                    chronometer = new Chronometer(getContext());
-                    mThreadChrono = new Thread(chronometer);
-                    mThreadChrono.start();
-                    chronometer.start();
-                }
+//                chronometer = new Chronometer(getContext());
+//                if (chronometer != null) {
+//                    chronometer = new Chronometer(getContext());
+//                    mThreadChrono = new Thread(chronometer);
+//                    mThreadChrono.start();
+//                    chronometer.start();
+//                }
+                since = SystemClock.uptimeMillis();
+                customHandler.postDelayed(updateTimerThread, 0);
+                //.postDelayed(updateTimerThread,0);
+
             }
         });
         btnStop.setOnClickListener(new View.OnClickListener() {
